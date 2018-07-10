@@ -508,16 +508,15 @@ uint8_t lm_dtmf_decision(lm_detector_t *d)
 	double row_2_peak = 0; 
 	double col_2_peak = 0; 
 
+	double dtmf_peak_energy = 0;						/* Energy of two maximum DTMF frequencies in the segment. */	
+	double total_dtmf_energy = 0;						/* Energy of all DTMF frequencies. */
+	double energy_ratio = 0;							/* Ratio of above: Amount of two max DTMF freq in total energy of all DTMF frequencies. */
+
 
 	if (!d || !d->detections || d->detections_n < 1) {
 		return 0;
 	}
 
-	/* Check if maximum peak is above peak threshold 2.
-	peak_diff = d->info.peak_max - d->info.peak_min;
-	if (peak_diff < d->peak_max_threshold2) {
-		return 0;
-	}*/
 	
 	/**
 	 * Check if there are 2 DTMF frequencies with peak above peak threshold:
@@ -529,6 +528,10 @@ uint8_t lm_dtmf_decision(lm_detector_t *d)
 	i = 0;
 	peak = d->info.peak_min;
 	while (i < 4) {
+		
+		/* Add energy to total energy calculation. */
+		total_dtmf_energy += d->detections[i].peak;
+
 		if (d->detections[i].peak > peak) {
 			peak = d->detections[i].peak;
 			peak_row_idx = i;
@@ -544,6 +547,10 @@ uint8_t lm_dtmf_decision(lm_detector_t *d)
 	/* Search for maximum peak in column frequencies. */
 	peak = d->info.peak_min;
 	while (i < 8) {
+		
+		/* Add energy to total energy calculation. */
+		total_dtmf_energy += d->detections[i].peak;
+
 		if (d->detections[i].peak > peak) {
 			peak = d->detections[i].peak;
 			peak_col_idx = i - 4;
@@ -560,38 +567,63 @@ uint8_t lm_dtmf_decision(lm_detector_t *d)
 	col_val = d->detections[4 + peak_col_idx].peak / d->info.peak_min;
 	row_val2 = d->detections[peak_row_idx2].peak / d->info.peak_min;
 	col_val2 = d->detections[4 + peak_col_idx2].peak / d->info.peak_min;
+	
+	/* Calculate energy of maximum DTMF frequencies. */
+	dtmf_peak_energy = d->detections[peak_row_idx].peak;
+	dtmf_peak_energy += d->detections[4 + peak_col_idx].peak;
+
+	if (total_dtmf_energy < 0.001) {
+		total_dtmf_energy = 0.001;
+	}
+
+	energy_ratio = dtmf_peak_energy / total_dtmf_energy;
 
 #if DEBUG_LM	
-	printf("lmusic: peak max=%f min=%f, max row/col: %f/%f max2 row/col: %f/%f, val row/col: %f/%f val2 row/col: %f/%f, digit candidate = '%c'\n",
+	printf("lmusic: peak max=%f min=%f, max row/col: %f/%f max2 row/col: %f/%f, val row/col: %f/%f val2 row/col: %f/%f, power diff=%f, energy[t:%f  dtmf:%f  d/t:%f] digit candidate = '%c'\n",
 			d->info.peak_max, d->info.peak_min,
 			d->detections[peak_row_idx].peak, d->detections[4 + peak_col_idx].peak,
 			d->detections[peak_row_idx2].peak, d->detections[4 + peak_col_idx2].peak,
-			row_val, col_val, row_val2, col_val2,
-			lm_dtmf_idx_2_char[1 + peak_row_idx * 4 + peak_col_idx]);
+			row_val, col_val, row_val2, col_val2, fabs(row_val / col_val),
+			total_dtmf_energy, dtmf_peak_energy, energy_ratio,
+			dd_dtmf_idx_2_char[1 + peak_row_idx * 4 + peak_col_idx]);
 #endif
 
-	/* Check if maximum peak is above peak threshold 3.
-	peak_diff = d->info.peak_max - d->info.peak_min;
-	if (peak_diff < d->peak_max_threshold3) {
-		return 0;
-	}*/
-
-	/* Both peaks must be above threshold 2 and min peak must be below threshold 1.
-	if ((d->detections[peak_row_idx].peak < d->peak_max_threshold2) 
-			|| (d->detections[4 + peak_col_idx].peak < d->peak_max_threshold2)
-			|| (d->info.peak_min > d->peak_max_threshold1)) {
-		return 0;
-	}*/
-
-	/* Both peaks must be above threshold 2 and min peak must be below threshold 1. */
+	/* Both peaks must be above threshold. */
 	if ((row_val < d->peak_max_threshold1) 
 			|| (col_val < d->peak_max_threshold1)) {
+
+#if DEBUG_LM
+		printf("libmusic: rejected due to energy threshold1 check\n");
+#endif
 		return 0;
 	}
 	
 	/* Both peaks must be more than CROSSTALK times second peaks. */
 	if ((row_val / row_val2 < LM_DTMF_CROSSTALK_THRESHOLD) 
 			|| (col_val / col_val2 < LM_DTMF_CROSSTALK_THRESHOLD)) {
+
+#if DEBUG_LM
+		printf("libmusic: rejected due to CROSSTALK check\n");
+#endif
+		return 0;
+	}
+
+	/* ITU Q-24 Recommendation for a power difference between frequencies
+	 * imposes 10dB maximum tollerance. */
+	if (fabs(row_val / col_val) > LM_DTMF_FREQ_POWER_DIFF_THRESHOLD) {
+
+#if DEBUG_LM
+		printf("libmusic: rejected due to ITU Q-24 10dB check\n");
+#endif
+		return 0;
+	}
+
+	/* Energy check. */
+	if (energy_ratio < LM_DTMF_ENERGY_RATIO) {
+
+#if DEBUG_LM
+		printf("libmusic: rejected due to energy check\n");
+#endif
 		return 0;
 	}
 
