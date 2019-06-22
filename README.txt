@@ -37,7 +37,7 @@
 
 libmusic
 
-Frequency detection using MUSIC algortihm.
+Frequency detection using MUSIC algorithm.
 
 
 Sources
@@ -59,6 +59,7 @@ make					(for debug: make CFLAGS="-ggdb -O0")
 make test
 make test check			(for autotesting)
 sudo make install		(will install libmusic to /usr/local/lib)
+sudo ldconfig
 
 
 Contact

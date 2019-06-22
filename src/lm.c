@@ -585,7 +585,7 @@ uint8_t lm_dtmf_decision(lm_detector_t *d)
 			d->detections[peak_row_idx2].peak, d->detections[4 + peak_col_idx2].peak,
 			row_val, col_val, row_val2, col_val2, fabs(row_val / col_val),
 			total_dtmf_energy, dtmf_peak_energy, energy_ratio,
-			dd_dtmf_idx_2_char[1 + peak_row_idx * 4 + peak_col_idx]);
+			lm_dtmf_idx_2_char[1 + peak_row_idx * 4 + peak_col_idx]);
 #endif
 
 	/* Both peaks must be above threshold. */
