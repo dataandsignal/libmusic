@@ -9,7 +9,7 @@ libmusic_la_LDFLAGS = -version-info 1:0:0
 
 bin_PROGRAMS = lmtool
 lmtool_SOURCES = src/lmtool.c
-lmtool_LDADD = -lmusic
+lmtool_LDADD = libmusic.la
 
 check_PROGRAMS = lmtest1 lmtest2 lmtest3 lmtest4 lmtest5 lmtest6 lmtest7 lmtest8 lmtest9 lmtest10 lmtest11
 TESTS = $(check_PROGRAMS)
