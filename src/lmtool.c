@@ -106,7 +106,8 @@ void int2float(int16_t *input, double *output, int length)
 int main (int argc, char **argv)
 {
     int16_t		data[XN];
-    double		sample_vector[XN];
+    int16_t		buffer[2*XN];
+    double		sample_vector[2*XN];
     size_t		word_n = 0;
     size_t		sample_n = 0;
     const char	*input_file_name = NULL;
@@ -146,25 +147,44 @@ int main (int argc, char **argv)
 
     word_n = fread(data, sizeof(int16_t), XN, fin);
 
+	// Shift previous
+	memcpy(&buffer[0], &buffer[XN], XN*sizeof(int16_t));
+	// Append new
+	memcpy(&buffer[XN], data, XN*sizeof(int16_t));
+
 	while(word_n == XN)
 	{
+		int k = 0;
 		frame_n++;
 
-		int2float(data, sample_vector, word_n);
-
-		dtmf_idx = lm_dtmf_detect(&d, sample_vector, XN);
-		if (dtmf_idx < 0) {
-			fprintf(stderr, "Error. lm_dtmf_detect failed with error %d\n", dtmf_idx);
-			goto lmtoolerr;
+		if (frame_n == 1) {
+			goto read_next;
 		}
 
-		/* Update detection state. */
-		lmtool_update_detection_state(&detection_state, dtmf_idx, sample_n);
-		
-		sample_n += XN;
+		int2float(buffer, sample_vector, 2*word_n);
+
+		while (k < XN) {
+			dtmf_idx = lm_dtmf_detect(&d, &sample_vector[k], XN);
+			if (dtmf_idx < 0) {
+				fprintf(stderr, "Error. lm_dtmf_detect failed with error %d\n", dtmf_idx);
+				goto lmtoolerr;
+			}
+			k++;
+			++sample_n;
+
+			/* Update detection state. */
+			lmtool_update_detection_state(&detection_state, dtmf_idx, sample_n);
+		}
+
+read_next:
 
 		/* Read next frame. */
-		word_n = fread(data, sizeof(int16_t), XN, fin );
+		word_n = fread(data, sizeof(int16_t), XN, fin);
+
+		// Shift previous
+		memcpy(&buffer[0], &buffer[XN], XN*sizeof(int16_t));
+		// Append new
+		memcpy(&buffer[XN], data, XN*sizeof(int16_t));
 	}
 	
 	/* Run 0 through process to finish DTMF detection reports. */
