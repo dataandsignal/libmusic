@@ -1,5 +1,5 @@
 #SUBDIRS = test
-dist_doc_DATA = README.txt
+dist_doc_DATA = README.md
 
 AM_CFLAGS    = -I./src -Iinclude -I$(srcdir)/include
 lib_LTLIBRARIES = libmusic.la
