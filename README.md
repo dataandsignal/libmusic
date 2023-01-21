@@ -73,7 +73,7 @@ This is explained in more detail in:
 
 - Penny W. D., Signal Processing Course, University College London, 2000
 
-- and also in my [engineering thesis](https://drive.google.com/file/d/1e2LjLYKVGIdSypj2sSbbauz2-SU5a1as/view?usp=sharing) (written in polish, will probably be translated to english) 
+- and also in my [engineering thesis](https://drive.google.com/file/d/1dfen9z3E5YuNjXSm3PTG00R4N38hmIMR/view?usp=sharing) (written in polish, will probably be translated to english) 
 
 
 
