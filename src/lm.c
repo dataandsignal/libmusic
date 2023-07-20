@@ -959,7 +959,7 @@ unsigned int lm_get_version(void)
 	return rv;
 }
 
-int lm_transpose(double *a, int n)
+void lm_transpose(double *a, int n)
 {
 	int i = 0, j = 0;
 	double tmp = 0;

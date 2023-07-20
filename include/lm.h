@@ -373,7 +373,7 @@ void lm_die(const char *s, const char *file, int line);
 #define lm_test_flag(p, f) (p)->flags & (f)
 
 /* Transpose square matrix @a in place. */
-int lm_transpose(double *a, int n);
+void lm_transpose(double *a, int n);
 
 /* For testing. */
 
