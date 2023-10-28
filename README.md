@@ -73,7 +73,7 @@ This is explained in more detail in:
 
 - Penny W. D., Signal Processing Course, University College London, 2000
 
-- and also in my [engineering thesis](https://drive.google.com/file/d/1dfen9z3E5YuNjXSm3PTG00R4N38hmIMR/view?usp=sharing) (written in polish, will probably be translated to english) 
+- and also in my [engineering thesis](https://drive.google.com/file/d/1dfen9z3E5YuNjXSm3PTG00R4N38hmIMR/view?usp=sharing) 
 
 
 
@@ -82,6 +82,14 @@ This is explained in more detail in:
 
 LIBMUSIC
 
-Copyright (C) 2018-2022, Piotr Gregor piotr@dataandsignal.com
+Copyright (C) 2018-2023, Piotr Gregor piotr@dataandsignal.com
 
 August 2022
+
+<hr/>
+<p align="center" style="text-align: center">
+    Project developed with a help of
+</p>
+<p align="center">
+    <img style="display: block; width: 40%; margin: auto" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png" alt="JetBrains Black Box Logo logo.">
+</p>
